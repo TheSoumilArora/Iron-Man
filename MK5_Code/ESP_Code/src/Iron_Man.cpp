@@ -3,12 +3,12 @@
 #include <Arduino.h>
 #include <Adafruit_BusIO_Register.h>
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();  // Create the motor driver object
 
 // Adjust for global change in small sg90 servo movement //
 #define SERVOMIN 150
 #define SERVOMAX 450
-/////////////////////////////////////////////////////
+
 #define SERVO_FREQ 50
 
 uint8_t servonum = 0;
