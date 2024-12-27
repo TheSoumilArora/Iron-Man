@@ -13,7 +13,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();  // Create the motor dr
 
 uint8_t servonum = 0;
 int buttonPin = 2;
-int ledPin = 6;
+int ledPin = 4;
 int buttonState = 0;
 int globalPos = 1;
 unsigned long previousMillis = 0;
