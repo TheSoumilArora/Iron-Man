@@ -12,7 +12,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();  // Create the motor dr
 #define SERVO_FREQ 50
 
 uint8_t servonum = 0;
-int buttonPin = 2;
+int buttonPin = 5;
 int ledPin = 4;
 int buttonState = 0;
 int globalPos = 1;
@@ -26,22 +26,22 @@ int mainServoR = 1;
 int servoBrowCenter = 4;
 
 // Adjust below numbers for individual servos
-int mainServoClosed = 750;
-int mainServoOpen = 1950;
+int mainServoClosed = 20;
+int mainServoOpen = 90;
 int servoBrowCenterOpen = 40;
 int servoBrowCenterClosed = 120;
 int servoCheeksOpen = 20;
 int servoCheeksClosed = 90;
 int servoNoseSideOpen = 10;
 int servoNoseSideClosed = 86;
-int servoBrowSideOpen = 30;
+int servoBrowSideOpen = 30; // this should be 20
 int servoBrowSideClosed = 90;
 int servoNoseCenterOpen = 1;
 int servoNoseCenterClosed = 110;
 
-
-void setup() {
-  Serial.begin(9600);
+void setup()
+{
+  Serial.begin(115200);
   Serial.println("Boot Up");
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
@@ -51,14 +51,15 @@ void setup() {
   pwm.sleep();
 }
 
-int getAngleToPulse(int angle) {
+int getAngleToPulse(int angle)
+{
   return map(angle, 0, 180, SERVOMIN, SERVOMAX);
 }
 
 void loop()
 {
   buttonState = digitalRead(buttonPin);
-  
+
   if (buttonState == 0)
   {
     Serial.println("Wake up");
@@ -68,44 +69,44 @@ void loop()
       Serial.println("Opening");
 
       // CHEEKS
-      for (uint16_t pulselen = servoCheeksClosed; pulselen >= servoCheeksOpen; pulselen--)
+      for (int angle = servoCheeksClosed; angle >= servoCheeksOpen; angle--)
       {
-        pwm.setPWM(9, 0, getAngleToPulse(servoCheeksClosed + servoCheeksOpen - pulselen));
-        pwm.setPWM(8, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(9, 0, getAngleToPulse(servoCheeksClosed + servoCheeksOpen - angle));
+        pwm.setPWM(8, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
       Serial.println("1. Cheeks Open");
 
       // NOSE Side
-      for (uint16_t pulselen = servoNoseSideClosed; pulselen >= servoNoseSideOpen; pulselen--)
+      for (int angle = servoNoseSideClosed; angle >= servoNoseSideOpen; angle--)
       {
-        pwm.setPWM(6, 0, getAngleToPulse(servoNoseSideClosed + servoNoseSideOpen - pulselen));
-        pwm.setPWM(7, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(6, 0, getAngleToPulse(servoNoseSideClosed + servoNoseSideOpen - angle));
+        pwm.setPWM(7, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
       Serial.println("2. Nose Side Open");
 
       //BROW Center
-      for (uint16_t pulselen = servoBrowCenterClosed; pulselen >= servoBrowCenterOpen; pulselen--)
+      for (int angle = servoBrowCenterClosed; angle >= servoBrowCenterOpen; angle--)
       {
-        pwm.setPWM(servoBrowCenter, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(servoBrowCenter, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
       Serial.println("3. Brow Center Open");
 
       // BROW Side
-      for (uint16_t pulselen = servoBrowSideOpen; pulselen <= servoBrowSideClosed; pulselen++)
+      for (int angle = servoBrowSideOpen; angle <= servoBrowSideClosed; angle++)
       {
-        pwm.setPWM(2, 0, getAngleToPulse(pulselen));
-        pwm.setPWM(3, 0, getAngleToPulse(servoBrowSideOpen + servoBrowSideClosed - pulselen));
+        pwm.setPWM(2, 0, getAngleToPulse(angle));
+        pwm.setPWM(3, 0, getAngleToPulse(servoBrowSideOpen + servoBrowSideClosed - angle));
       }
       delay(animDelay);
       Serial.println("4. Brow Side Open");
       
       // NOSE Center
-      for (uint16_t pulselen = servoNoseCenterClosed; pulselen >= servoNoseCenterOpen; pulselen--)
+      for (int angle = servoNoseCenterClosed; angle >= servoNoseCenterOpen; angle--)
       {
-        pwm.setPWM(5, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(5, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
       Serial.println("5. Nose Center Open");
@@ -114,66 +115,66 @@ void loop()
       analogWrite(ledPin, 0); 
       
       // MAIN SERVOS
-      for (uint16_t microsec = mainServoClosed; microsec < mainServoOpen; microsec +=5)
+      for (int angle = mainServoOpen; angle >= mainServoClosed; angle--)
       {
-        pwm.writeMicroseconds(mainServoL, microsec);
-        pwm.writeMicroseconds(mainServoR, (mainServoOpen+mainServoClosed-microsec));
+        pwm.setPWM(mainServoL, 0, getAngleToPulse(angle));
+        pwm.setPWM(mainServoR, 0, getAngleToPulse(mainServoOpen + mainServoClosed - angle));
       }
       globalPos = 0;
       delay(animDelay);
       Serial.println("6. Main Open");
     }
-    
+
     else
     {
       Serial.println("Closing");
-      
+
       //MAIN SERVOS
-      for (uint16_t microsec = mainServoOpen; microsec > mainServoClosed; microsec-=5)
+      for (int angle = mainServoClosed; angle <= mainServoOpen; angle++)
       {
-        pwm.writeMicroseconds(mainServoL, microsec);
-        pwm.writeMicroseconds(mainServoR, (mainServoOpen+mainServoClosed-microsec));
+        pwm.setPWM(mainServoL, 0, getAngleToPulse(angle));
+        pwm.setPWM(mainServoR, 0, getAngleToPulse(mainServoOpen + mainServoClosed - angle));
       }
       delay(animDelay);
-      
+
       //NOSE Center
-      for (uint16_t pulselen = servoNoseCenterOpen; pulselen <= servoNoseCenterClosed; pulselen++)
+      for (int angle = servoNoseCenterOpen; angle <= servoNoseCenterClosed; angle++)
       {
-        pwm.setPWM(5, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(5, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
-      
+
       // BROW Side
-      for (uint16_t pulselen = servoBrowSideClosed; pulselen >= servoBrowSideOpen; pulselen--)
+      for (int angle = servoBrowSideClosed; angle >= servoBrowSideOpen; angle--)
       {
-        pwm.setPWM(2, 0, getAngleToPulse(pulselen));
-        pwm.setPWM(3, 0, getAngleToPulse(servoBrowSideOpen + servoBrowSideClosed - pulselen));
+        pwm.setPWM(2, 0, getAngleToPulse(angle));
+        pwm.setPWM(3, 0, getAngleToPulse(servoBrowSideOpen + servoBrowSideClosed - angle));
       }
       delay(animDelay);
-      
+
       // BROW Center
-      for (uint16_t pulselen = servoBrowCenterOpen; pulselen <= servoBrowCenterClosed; pulselen++)
+      for (int angle = servoBrowCenterOpen; angle <= servoBrowCenterClosed; angle++)
       {
-        pwm.setPWM(servoBrowCenter, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(servoBrowCenter, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
-      
+
       // NOSE Side
-      for (uint16_t pulselen = servoNoseSideOpen; pulselen <= servoNoseSideClosed; pulselen++)
+      for (int angle = servoNoseSideOpen; angle <= servoNoseSideClosed; angle++)
       {
-        pwm.setPWM(6, 0, getAngleToPulse(servoNoseSideClosed + servoNoseSideOpen - pulselen));
-        pwm.setPWM(7, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(6, 0, getAngleToPulse(servoNoseSideClosed + servoNoseSideOpen - angle));
+        pwm.setPWM(7, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
-      
+
       //CHEEKS
-      for (uint16_t pulselen = servoCheeksOpen; pulselen <= servoCheeksClosed; pulselen++)
+      for (int angle = servoCheeksOpen; angle <= servoCheeksClosed; angle++)
       {
-        pwm.setPWM(9, 0, getAngleToPulse(servoCheeksClosed + servoCheeksOpen - pulselen));
-        pwm.setPWM(8, 0, getAngleToPulse(pulselen));
+        pwm.setPWM(9, 0, getAngleToPulse(servoCheeksClosed + servoCheeksOpen - angle));
+        pwm.setPWM(8, 0, getAngleToPulse(angle));
       }
       delay(animDelay);
-      
+
       //EYES
       analogWrite(ledPin, 255);
       globalPos = 1;
